@@ -2,8 +2,9 @@
 import { Users } from "../../data";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import toast from "react-hot-toast";
 
-export const UserSelect = ({ employeeName, setEmployeeName }) => {
+export const BreakManager = ({ employeeName, setEmployeeName }) => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [description, setDescription] = useState("");
@@ -68,15 +69,15 @@ export const UserSelect = ({ employeeName, setEmployeeName }) => {
       });
       if (response.ok) {
         const result = await response.json();
-        console.log("Break started for", name);
-        setUserHasActiveBreak(true); // Update state to show end button
-        await checkUserBreakStatus(name); // Refresh the data
+        toast.success(`Break started for ${name}`);
+        setUserHasActiveBreak(true); 
+        await checkUserBreakStatus(name); 
       } else {
-        console.log("failed to start break for", name);
+      toast.error(`failed to start break for ${name}`);
         alert("Failed to start break. Please try again.");
       }
     } catch (error) {
-      console.log("failed to start break for", name);
+      toast.error(`failed to start break for ${name}`);
       alert("Error starting break. Please try again.");
     } finally {
       setIsLoading(false);
@@ -106,15 +107,16 @@ export const UserSelect = ({ employeeName, setEmployeeName }) => {
       });
 
       if (response.ok) {
-        console.log("Break ended for", name);
-        setUserHasActiveBreak(false); // Update state to show start button
+        toast.success(`Break ended for ${name}`);
+        setUserHasActiveBreak(false);
+        setEmployeeName("");
         await checkUserBreakStatus(name); // Refresh the data
       } else {
-        console.log("failed to end break for", name);
+      toast.error(`failed to end break for ${name}`);
         alert("Failed to end break. Please try again.");
       }
     } catch (error) {
-      console.log("failed to end break for", name);
+      toast.error(`failed to end break for ${name}`);
       alert("Error ending break. Please try again.");
     } finally {
       setIsLoading(false);
@@ -142,10 +144,36 @@ export const UserSelect = ({ employeeName, setEmployeeName }) => {
       setIsLoading(false);
     }
   };
+  function formatDate(date) {
+    const day = date.getDate();
+    const month = date
+      .toLocaleString("en-US", { month: "long", timeZone: "Africa/Lagos" })
+      .toUpperCase();
+    const year = date.getFullYear();
 
+    // Function to add "st", "nd", "rd", "th"
+    const getOrdinal = (n) => {
+      if (n > 3 && n < 21) return "TH";
+      switch (n % 10) {
+        case 1:
+          return "ST";
+        case 2:
+          return "ND";
+        case 3:
+          return "RD";
+        default:
+          return "TH";
+      }
+    };
+    return `${day}${getOrdinal(day)} ${month}, ${year}`;
+  }
+  const today = new Date();
   return (
-    <>
-      <div className="flex flex-col gap-4">
+    <div className="min-h-[calc(100vh-64px)]">
+      <div className="flex flex-col gap-4 ">
+        <h1 className="text-2xl ">
+          BREAK TRACKER FOR {formatDate(today)}{" "}
+        </h1>
         <select
           className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100"
           value={employeeName}
@@ -221,7 +249,7 @@ export const UserSelect = ({ employeeName, setEmployeeName }) => {
         <div>
           {showBreaksheet && (
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
+              <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
@@ -242,45 +270,57 @@ export const UserSelect = ({ employeeName, setEmployeeName }) => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {data.map((item, index) => (
-                    <tr
-                      key={index}
-                      className={item.breakEnd ? "" : "bg-blue-50"}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {item.employeeName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(item.breakStart).toLocaleString([], {
-                          timeZone: "Africa/Lagos",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.breakEnd
-                          ? new Date(item.breakEnd).toLocaleString([], {
-                              timeZone: "Africa/Lagos",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true,
-                            })
-                          : "Ongoing"}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {item.description}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.breakEnd
-                          ? `${Math.round(
-                              (new Date(item.breakEnd) -
-                                new Date(item.breakStart)) /
-                                60000
-                            )} minutes`
-                          : "In progress"}
-                      </td>
-                    </tr>
-                  ))}
+                  {data
+                    .filter((item) => {
+                      const breakStartDate = new Date(item.breakStart);
+                      const today = new Date();
+
+                      // Check if break started today (same day, month, and year)
+                      return (
+                        breakStartDate.getDate() === today.getDate() &&
+                        breakStartDate.getMonth() === today.getMonth() &&
+                        breakStartDate.getFullYear() === today.getFullYear()
+                      );
+                    })
+                    .map((item, index) => (
+                      <tr
+                        key={index}
+                        className={item.breakEnd ? "" : "bg-blue-50"}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {item.employeeName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(item.breakStart).toLocaleString([], {
+                            timeZone: "Africa/Lagos",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {item.breakEnd
+                            ? new Date(item.breakEnd).toLocaleString([], {
+                                timeZone: "Africa/Lagos",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })
+                            : "Ongoing"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          {item.description}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {item.breakEnd
+                            ? `${Math.round(
+                                (new Date(item.breakEnd) -
+                                  new Date(item.breakStart)) /
+                                  60000
+                              )} minutes`
+                            : "In progress"}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
 
@@ -293,6 +333,6 @@ export const UserSelect = ({ employeeName, setEmployeeName }) => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };

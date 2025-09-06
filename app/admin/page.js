@@ -36,10 +36,10 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fef2f2] flex items-center justify-center p-4">
+    <div className="min-h-[calc(100vh-64px)] bg-[#fef2f2] flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-8">
-          Admin Login
+          ADMIN LOGIN
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <input
@@ -55,7 +55,7 @@ export default function AdminLogin() {
             type="submit"
             disabled={isLoading}
             className="w-full bg-[#ec3338] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#dc2626] transition-colors duration-200 disabled:bg-[#f8b4b4] disabled:cursor-not-allowed shadow-md hover:shadow-lg">
-            {isLoading ? "Logging in..." : "Login"}
+            {isLoading ? "LOGGING IN..." : "LOGIN"}
           </button>
         </form>
         <button

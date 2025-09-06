@@ -15,6 +15,13 @@ export async function POST() {
       maxAge: 0, // Expire immediately
       path: "/",
     });
+    //clear JS Readable Cookie
+    response.cookies.set("admin-log", "", {
+      httpOnly: false,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 86400,
+    });
 
     return response;
   } catch (error) {
