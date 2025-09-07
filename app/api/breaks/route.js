@@ -1,54 +1,64 @@
-import { openDb } from "../../../lib/db";
+import { connectToDatabase } from "../../../lib/mongodb";
+import { ObjectId } from "mongodb";
 
-// Handle GET requests
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const date = searchParams.get("date"); // Get date from query parameter
-
-  const db = await openDb();
   try {
-    let query = "SELECT * FROM breaks";
-    let params = [];
+    const { db } = await connectToDatabase();
+    const { searchParams } = new URL(request.url);
+    const date = searchParams.get("date");
+
+    let query = {};
 
     if (date) {
-      // Filter by date (ignoring time component)
-      query += " WHERE date(breakStart) = ?";
-      params.push(date);
+      // Filter by date (create start and end of day for the given date)
+      const startDate = new Date(date);
+      const endDate = new Date(date);
+      endDate.setDate(endDate.getDate() + 1); // Next day
+
+      query.breakStart = {
+        $gte: startDate,
+        $lt: endDate,
+      };
     }
 
-    query += " ORDER BY breakStart DESC";
+    const breaks = await db
+      .collection("breaks")
+      .find(query)
+      .sort({ breakStart: -1 }) // Sort by breakStart descending
+      .toArray();
 
-    const breaks = await db.all(query, params);
     return Response.json(breaks);
   } catch (error) {
+    console.error("MongoDB error:", error);
     return Response.json({ error: "Failed to fetch Breaks" }, { status: 500 });
-  } finally {
-    await db.close();
   }
 }
 
-// Handle POST requests
 export async function POST(request) {
-  const db = await openDb();
   try {
-    const { employeeName, description } = await request.json(); // Get data from the request body
-    const result = await db.run(
-      "INSERT INTO breaks (employeeName, breakStart, description) VALUES (?, datetime('now', '+1 hour'), ?)",
+    const { db } = await connectToDatabase();
+    const { employeeName, description } = await request.json();
+
+    // Create new break document
+    const newBreak = {
       employeeName,
-      description
-    );
+      description,
+      breakStart: new Date(), // Current time (adjust timezone if needed)
+      breakEnd: null, // Break hasn't ended yet
+    };
+
+    const result = await db.collection("breaks").insertOne(newBreak);
 
     return Response.json(
       {
         message: "Break Started",
-        id: result.lastID,
+        id: result.insertedId, // MongoDB uses insertedId instead of lastID
         employeeName,
       },
       { status: 201 }
     );
   } catch (error) {
+    console.error("MongoDB error:", error);
     return Response.json({ error: "Failed to start Break" }, { status: 500 });
-  } finally {
-    await db.close();
   }
 }

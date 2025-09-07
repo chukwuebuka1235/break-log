@@ -2,6 +2,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { getApiBaseUrl } from '../../lib/api'
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
@@ -13,7 +14,7 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -23,7 +24,7 @@ export default function AdminLogin() {
 
       if (response.ok) {
         router.push("/admin/dashboard");
-        router.refresh(); // Refresh to apply the new cookie
+        router.refresh();
       } else {
         const error = await response.json();
         alert(error.error || "Login failed");

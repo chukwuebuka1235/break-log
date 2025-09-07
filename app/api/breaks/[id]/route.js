@@ -1,54 +1,83 @@
-import { openDb } from "../../../../lib/db";
+// app/api/breaks/[id]/route.js
+import { connectToDatabase } from "../../../../lib/mongodb";
+import { ObjectId } from "mongodb";
 
 // Handle PUT requests to end a break
 export async function PUT(request, { params }) {
-  const { id } = params; // Get the id from the URL parameters
-  const db = await openDb();
-
   try {
-    await db.run(
-      'UPDATE breaks SET breakEnd = datetime("now", "+1 hour") WHERE id = ?',
-      id
+    const { db } = await connectToDatabase();
+    const { id } = params;
+
+    // Validate ID format
+    if (!ObjectId.isValid(id)) {
+      return Response.json({ error: "Invalid break ID" }, { status: 400 });
+    }
+
+    // Update the break to set end time
+    const result = await db.collection("breaks").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { breakEnd: new Date() } } // Set current time as break end
     );
-    return Response.json({ message: "Break Ended Successfully" });
-  } catch (error) {
-    return Response.json({ error: "Failed to end break" }, { status: 500 });
-  } finally {
-    await db.close();
-  }
-}
 
-//  Add a GET handler to fetch a specific break by ID
-export async function GET(request, { params }) {
-  const { id } = params;
-  const db = await openDb();
-
-  try {
-    const breakRecord = await db.get("SELECT * FROM breaks WHERE id = ?", id);
-
-    if (!breakRecord) {
+    if (result.matchedCount === 0) {
       return Response.json({ error: "Break not found" }, { status: 404 });
     }
 
-    return Response.json(breakRecord);
+    return Response.json({ message: "Break Ended Successfully" });
   } catch (error) {
-    return Response.json({ error: "Failed to fetch break" }, { status: 500 });
-  } finally {
-    await db.close();
+    console.error("MongoDB error:", error);
+    return Response.json({ error: "Failed to end break" }, { status: 500 });
   }
 }
 
-// Add a DELETE handler to remove a break record
-export async function DELETE(request, { params }) {
-  const { id } = params;
-  const db = await openDb();
+// // Add a GET handler to fetch a specific break by ID
+// export async function GET(request, { params }) {
+//   try {
+//     const { db } = await connectToDatabase();
+//     const { id } = params;
 
-  try {
-    await db.run("DELETE FROM breaks WHERE id = ?", id);
-    return Response.json({ message: "Break deleted successfully" });
-  } catch (error) {
-    return Response.json({ error: "Failed to delete break" }, { status: 500 });
-  } finally {
-    await db.close();
-  }
-}
+//     // Validate ID format
+//     if (!ObjectId.isValid(id)) {
+//       return Response.json({ error: "Invalid break ID" }, { status: 400 });
+//     }
+
+//     const breakRecord = await db
+//       .collection("breaks")
+//       .findOne({ _id: new ObjectId(id) });
+
+//     if (!breakRecord) {
+//       return Response.json({ error: "Break not found" }, { status: 404 });
+//     }
+
+//     return Response.json(breakRecord);
+//   } catch (error) {
+//     console.error("MongoDB error:", error);
+//     return Response.json({ error: "Failed to fetch break" }, { status: 500 });
+//   }
+// }
+
+// // Add a DELETE handler to remove a break record
+// export async function DELETE(request, { params }) {
+//   try {
+//     const { db } = await connectToDatabase();
+//     const { id } = params;
+
+//     // Validate ID format
+//     if (!ObjectId.isValid(id)) {
+//       return Response.json({ error: "Invalid break ID" }, { status: 400 });
+//     }
+
+//     const result = await db
+//       .collection("breaks")
+//       .deleteOne({ _id: new ObjectId(id) });
+
+//     if (result.deletedCount === 0) {
+//       return Response.json({ error: "Break not found" }, { status: 404 });
+//     }
+
+//     return Response.json({ message: "Break deleted successfully" });
+//   } catch (error) {
+//     console.error("MongoDB error:", error);
+//     return Response.json({ error: "Failed to delete break" }, { status: 500 });
+//   }
+// }
