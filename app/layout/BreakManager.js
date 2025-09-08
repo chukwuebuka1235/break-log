@@ -328,7 +328,7 @@ return (
 
             {data.length === 0 && (
               <div className="p-8 text-center text-gray-500">
-                No break records found. Click the button to fetch breaks.
+                No break records found.
               </div>
             )}
           </div>

@@ -1,8 +1,8 @@
-// app/admin/page.js
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { getApiBaseUrl } from '../../lib/api'
+import toast from "react-hot-toast";
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
@@ -27,7 +27,7 @@ export default function AdminLogin() {
         router.refresh();
       } else {
         const error = await response.json();
-        alert(error.error || "Login failed");
+        toast.error(error.error || "Login failed");
       }
     } catch (error) {
       alert("Login failed. Please try again.");
