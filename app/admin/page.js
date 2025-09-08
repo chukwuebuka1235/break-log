@@ -1,20 +1,19 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getApiBaseUrl } from '../../lib/api'
 import toast from "react-hot-toast";
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

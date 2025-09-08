@@ -1,7 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation';
 import { useState , useEffect } from 'react'
-import { getApiBaseUrl } from "../../../lib/api";
 export default function Page() {
   const [breaks, setBreaks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(
@@ -16,7 +15,7 @@ export default function Page() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/api/breaks?date=${date}`
+        `/api/breaks?date=${date}`
       );
       if (response.ok) {
         const data = await response.json();
