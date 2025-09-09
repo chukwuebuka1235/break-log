@@ -1,3 +1,4 @@
+// components/Navbar.js
 "use client";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -6,35 +7,87 @@ import { useEffect, useState } from "react";
 export const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthUI, setShowAuthUI] = useState(false);
+  const [userName, setUserName] = useState("");
   const [isDashboardPage, setIsDashboardPage] = useState(false);
 
   useEffect(() => {
     const dashboardActive = pathname.includes("/admin/dashboard");
     setIsDashboardPage(dashboardActive);
-    // console.log(dashboardActive, "dashboard active");
+
+    // Check cookies directly for authentication status
+    const checkAuthStatus = () => {
+      const adminCookie = document.cookie.includes("admin-authenticated=true");
+      const employeeCookie = document.cookie.includes(
+        "employee-authenticated=true"
+      );
+
+      // Get user data from localStorage if available
+      const userData = localStorage.getItem("user");
+      let user = null;
+
+      if (userData) {
+        try {
+          user = JSON.parse(userData);
+        } catch (error) {
+          localStorage.removeItem("user");
+        }
+      }
+
+      // Strict validation: Only show UI if cookie AND user data match page
+      if (pathname.includes("/admin") && adminCookie && user && user.isAdmin) {
+        setShowAuthUI(true);
+        setUserName(user.name);
+      } else if (
+        !pathname.includes("/admin") &&
+        employeeCookie &&
+        user &&
+        !user.isAdmin
+      ) {
+        setShowAuthUI(true);
+        setUserName(user.name);
+      } else {
+        setShowAuthUI(false);
+        setUserName("");
+
+        // Clear inconsistent state
+        if ((adminCookie || employeeCookie) && !user) {
+          // Cookies exist but no user data - clear cookies
+          document.cookie =
+            "admin-authenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie =
+            "employee-authenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+      }
+    };
+
+    checkAuthStatus();
+
+    // Check auth status on route changes
+    const interval = setInterval(checkAuthStatus, 1000); // Check every second
+    return () => clearInterval(interval);
   }, [pathname]);
 
-  // const handleLogout = async () => {
-  //   try {
-  //     const response = await fetch("/api/auth/logout", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-  //     if (response.ok) {
-  //       setIsAuthenticated(false);
-  //       router.push("/admin");
-  //       router.refresh();
-  //     } else {
-  //       const error = await response.json();
-  //       alert(error.error || "Logout Failed");
-  //     }
-  //   } catch (error) {
-  //     alert("Logout Failed , Please Try Again");
-  //   }
-  // };
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Logout API error:", error);
+    } finally {
+      // Always clear both storage and cookies
+      localStorage.removeItem("user");
+      document.cookie =
+        "admin-authenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie =
+        "employee-authenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie =
+        "employee-id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+      setShowAuthUI(false);
+      setUserName("");
+      router.push("/");
+    }
+  };
 
   return (
     <nav className="bg-[#fef2f2] shadow-sm ">
@@ -49,16 +102,26 @@ export const Navbar = () => {
             className="cursor-pointer hover:opacity-80 transition-opacity"
           />
         </section>
-        <section>
-          {!isDashboardPage &&
+
+        <section className="flex items-center gap-4">
+          {showAuthUI ? (
+            <>
+              <span className="text-gray-700">Welcome, {userName}</span>
+              <button
+                onClick={handleLogout}
+                className="cursor-pointer bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition-colors">
+                LOGOUT
+              </button>
+            </>
+          ) : !isDashboardPage ? (
             <button
-              onClick={() => router.push("/admin")}
-              className="cursor-pointer bg-[#ec3338] text-white px-4 py-1 rounded-lg hover:bg-red-500">
-              ADMIN LOGIN
+              onClick={() => router.push("/login")}
+              className="cursor-pointer bg-[#ec3338] text-white px-4 py-1 rounded-lg hover:bg-red-500 transition-colors">
+              LOGIN
             </button>
-          }
+          ) : null}
         </section>
       </div>
-    </nav> 
+    </nav>
   );
 };

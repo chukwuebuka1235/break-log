@@ -1,53 +1,68 @@
+// middleware.js
 import { NextResponse } from "next/server";
 
 export function middleware(request) {
-  const response = NextResponse.next();
+  const { pathname } = request.nextUrl;
 
-  // 1. CORS HEADERS RO ALLOW ME CONNECT WITH MY VERCEL APP
-  const allowedOrigins = [
-    "https://break-log.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:3001",
-  ];
+  console.log(`Middleware checking: ${pathname}`);
 
-  const origin = request.headers.get("origin");
+  // ADMIN ROUTES - Only accessible with admin cookie
+  if (pathname.startsWith("/admin/")) {
+    console.log("Admin route detected");
 
-  if (origin && allowedOrigins.includes(origin)) {
-    response.headers.set("Access-Control-Allow-Origin", origin);
-  }
+    const adminCookie = request.cookies.get("admin-authenticated");
+    const employeeCookie = request.cookies.get("employee-authenticated");
 
-  response.headers.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  response.headers.set(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
-  response.headers.set("Access-Control-Allow-Credentials", "true");
+    console.log(
+      `Admin cookie: ${!!adminCookie}, Employee cookie: ${!!employeeCookie}`
+    );
 
-  // ADMIN AUTH CHECK
-  if (request.nextUrl.pathname.startsWith("/admin/dashboard")) {
-    const isAdminAuthenticated = request.cookies.get("admin-authenticated");
-
-    if (!isAdminAuthenticated || isAdminAuthenticated.value !== "true") {
-      return NextResponse.redirect(new URL("/admin", request.url));
+    // Strict check: Only allow if admin cookie exists AND no employee cookie
+    if (!adminCookie || employeeCookie) {
+      console.log("Access denied to admin area");
+      // Clear any employee cookies if trying to access admin area
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      if (employeeCookie) {
+        response.cookies.delete("employee-authenticated");
+        response.cookies.delete("employee-id");
+      }
+      return response;
     }
+
+    console.log("Admin access granted");
+    return NextResponse.next();
   }
 
-  if (request.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: response.headers,
-    });
+  // EMPLOYEE ROUTES - Only accessible with employee cookie
+  if (pathname === "/") {
+    console.log("Employee route detected");
+
+    const adminCookie = request.cookies.get("admin-authenticated");
+    const employeeCookie = request.cookies.get("employee-authenticated");
+
+    console.log(
+      `Admin cookie: ${!!adminCookie}, Employee cookie: ${!!employeeCookie}`
+    );
+
+    // Strict check: Only allow if employee cookie exists AND no admin cookie
+    if (!employeeCookie || adminCookie) {
+      console.log("Access denied to employee area");
+      // Clear any admin cookies if trying to access employee area
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      if (adminCookie) {
+        response.cookies.delete("admin-authenticated");
+      }
+      return response;
+    }
+
+    console.log("Employee access granted");
+    return NextResponse.next();
   }
 
-  return response;
+  // For all other routes, allow access
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/api/:path*", // Apply CORS to all API routes
-    "/admin/dashboard/:path*", // Apply auth check to admin routes
-  ],
+  matcher: ["/", "/admin", "/admin/:path*"],
 };
