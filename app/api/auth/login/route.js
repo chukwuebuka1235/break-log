@@ -1,23 +1,24 @@
-// app/api/auth/login/route.js
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
+import bcrypt from "bcryptjs"; 
 
 export async function POST(request) {
-  const { email, password } = await request.json();
+  const { idCard, password } = await request.json();
 
   try {
     const client = await MongoClient.connect(process.env.MONGODB_URI);
     const db = client.db();
-
-    const user = await db.collection("employees").findOne({ email });
+    const user = await db.collection("employees").findOne({ idCard });
 
     if (!user) {
       client.close();
       return NextResponse.json({ message: "User not found" }, { status: 401 });
     }
 
-    // In a real app, you should use proper password hashing (bcrypt)
-    if (user.password !== password) {
+    // Use bcrypt to compare the provided password with the hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
       client.close();
       return NextResponse.json(
         { message: "Invalid password" },

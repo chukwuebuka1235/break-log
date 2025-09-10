@@ -1,6 +1,6 @@
-// app/api/auth/register/route.js
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
+import bcrypt from "bcryptjs"; // Add this import
 
 export async function POST(request) {
   const { name, email, idCard, password } = await request.json();
@@ -8,33 +8,30 @@ export async function POST(request) {
   try {
     const client = await MongoClient.connect(process.env.MONGODB_URI);
     const db = client.db();
-
-    // Check if user already exists
     const existingUser = await db.collection("employees").findOne({
-      $or: [{ email }, { idCard }],
+      $or: [{ idCard }, { email }],
     });
 
     if (existingUser) {
       client.close();
       return NextResponse.json(
-        { message: "User with this email or ID card already exists" },
+        { message: "User with this ID card or email already exists" },
         { status: 409 }
       );
     }
-
-    // Create new user
+    const hashedPassword = await bcrypt.hash(password, 10);
     const result = await db.collection("employees").insertOne({
       name,
       email,
       idCard,
-      password, // In a real app, hash this password before storing
+      password: hashedPassword, // Store hashed password
       createdAt: new Date(),
     });
 
     client.close();
 
     return NextResponse.json(
-      { message: "Registration successful" },
+      { message: "Registration successful", userId: result.insertedId },
       { status: 201 }
     );
   } catch (error) {

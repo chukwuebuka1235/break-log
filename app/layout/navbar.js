@@ -113,12 +113,6 @@ export const Navbar = () => {
                 LOGOUT
               </button>
             </>
-          ) : !isDashboardPage ? (
-            <button
-              onClick={() => router.push("/login")}
-              className="cursor-pointer bg-[#ec3338] text-white px-4 py-1 rounded-lg hover:bg-red-500 transition-colors">
-              LOGIN
-            </button>
           ) : null}
         </section>
       </div>

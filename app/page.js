@@ -1,9 +1,8 @@
-// app/page.js
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BreakManager } from "./layout/BreakManager";
-// import { Navbar } from "./layout/navbar";
+import { Navbar } from "./layout/navbar";
 
 export default function Home() {
   const [employeeName, setEmployeeName] = useState("");
@@ -39,7 +38,7 @@ export default function Home() {
 
   return (
     <div className="font-sans bg-[#fef2f2] min-h-screen">
-      {/* <Navbar /> */}
+      <Navbar />
       <div className="flex flex-col items-center justify-center gap-4 p-8">
         <BreakManager
           employeeName={employeeName}

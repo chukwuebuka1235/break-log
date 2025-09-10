@@ -179,9 +179,9 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
   const today = new Date();
 
   return (
-    <div className="min-h-[calc(100vh-64px)]">
+    <div className="">
       <div className="flex flex-col gap-4 ">
-        <h1 className="sm:text-2xl ">BREAK TRACKER FOR {formatDate(today)} </h1>
+        <h1 className="sm:text-xl ">BREAK TRACKER FOR {formatDate(today)} </h1>
 
         {/* Display the authenticated user's name */}
         {/* <div className="border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
@@ -224,7 +224,7 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
 
       <div className="mt-8">
         <div className="flex items-center justify-center flex-col">
-          <h1 className="sm:text-2xl mb-4">BREAKSHEET</h1>
+          <h1 className="sm:text-1xl mb-4">BREAKSHEET</h1>
           <div className="mb-6">
             <button
               onClick={() => {
@@ -244,7 +244,6 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
             </button>
           </div>
         </div>
-
         <div>
           {showBreaksheet && (
             <div className="overflow-x-auto">

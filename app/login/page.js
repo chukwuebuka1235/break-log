@@ -1,4 +1,3 @@
-// app/login/page.js
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,13 +6,14 @@ export default function LoginPage() {
   const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [adminId, setAdminId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isEmployeeLogin, setIsEmployeeLogin] = useState(true);
   const [employeeData, setEmployeeData] = useState({
     name: "",
     email: "",
     idCard: "",
     password: "",
   });
-  const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -57,61 +57,83 @@ export default function LoginPage() {
     setIsLoading(false);
   };
 
-  const handleEmployeeSubmit = async (e) => {
+  const handleEmployeeLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      if (isLogin) {
-        // Employee login
-        const response = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: employeeData.email,
-            password: employeeData.password,
-          }),
-        });
+      // Employee login
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idCard: employeeData.idCard,
+          password: employeeData.password,
+        }),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (response.ok) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-          router.push("/");
-        } else {
-          alert(data.message || "Login failed");
-        }
+      if (response.ok) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        router.push("/");
       } else {
-        // Employee registration
-        const response = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(employeeData),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          alert("Registration successful! Please login.");
-          setIsLogin(true);
-          setEmployeeData({
-            ...employeeData,
-            password: "",
-          });
-        } else {
-          alert(data.message || "Registration failed");
-        }
+        alert(data.message || "Login failed");
       }
-      setIsLoading(false);
     } catch (error) {
-      console.error("Authentication error:", error);
+      console.error("Login error:", error);
       alert("An error occurred. Please try again.");
-      setIsLoading(false);
     }
+    setIsLoading(false);
+  };
+
+  const handleEmployeeRegister = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Employee registration validation
+      if (employeeData.password.length < 6) {
+        alert("Password must be at least 6 characters long");
+        setIsLoading(false);
+        return;
+      }
+      if (employeeData.password !== confirmPassword) {
+        alert("Passwords do not match");
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(employeeData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Registration successful! Please login.");
+        setIsEmployeeLogin(true);
+        setEmployeeData({
+          name: "",
+          email: "",
+          idCard: "",
+          password: "",
+        });
+        setConfirmPassword("");
+      } else {
+        alert(data.message || "Registration failed");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert("An error occurred. Please try again.");
+    }
+    setIsLoading(false);
   };
 
   const handleEmployeeChange = (e) => {
@@ -121,17 +143,30 @@ export default function LoginPage() {
     });
   };
 
+  const toggleEmployeeMode = () => {
+    setIsEmployeeLogin(!isEmployeeLogin);
+    // Reset form when toggling
+    setEmployeeData({
+      name: "",
+      email: "",
+      idCard: "",
+      password: "",
+    });
+    setConfirmPassword("");
+  };
+
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#fef2f2] flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+    <div
+      id="Login-page"
+      className="h-screen flex items-center justify-center p-4 ">
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md bg-opacity-90">
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
           {isAdminLogin
             ? "ADMIN LOGIN"
-            : isLogin
+            : isEmployeeLogin
             ? "EMPLOYEE LOGIN"
             : "EMPLOYEE REGISTRATION"}
         </h1>
-
         {/* Toggle between Admin and Employee */}
         <div className="flex mb-6 bg-gray-100 p-1 rounded-lg">
           <button
@@ -185,9 +220,38 @@ export default function LoginPage() {
             </button>
           </form>
         ) : (
-          // Employee Login/Registration Form
-          <form onSubmit={handleEmployeeSubmit} className="space-y-4">
-            {!isLogin && (
+          // Employee Form
+          <form
+            onSubmit={
+              isEmployeeLogin ? handleEmployeeLogin : handleEmployeeRegister
+            }
+            className="space-y-4">
+            {/* EMPLOYEE LOGIN FIELDS */}
+            {isEmployeeLogin ? (
+              <>
+                <input
+                  type="text"
+                  name="idCard"
+                  placeholder="ID Card Number"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  value={employeeData.idCard}
+                  onChange={handleEmployeeChange}
+                  disabled={isLoading}
+                  required
+                />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  value={employeeData.password}
+                  onChange={handleEmployeeChange}
+                  disabled={isLoading}
+                  required
+                />
+              </>
+            ) : (
+              // EMPLOYEE REGISTRATION FIELDS
               <>
                 <input
                   type="text"
@@ -195,6 +259,16 @@ export default function LoginPage() {
                   placeholder="Full Name"
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   value={employeeData.name}
+                  onChange={handleEmployeeChange}
+                  disabled={isLoading}
+                  required
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Company Email"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  value={employeeData.email}
                   onChange={handleEmployeeChange}
                   disabled={isLoading}
                   required
@@ -209,45 +283,48 @@ export default function LoginPage() {
                   disabled={isLoading}
                   required
                 />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  value={employeeData.password}
+                  onChange={handleEmployeeChange}
+                  disabled={isLoading}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  required
+                />
               </>
             )}
-            <input
-              type="email"
-              name="email"
-              placeholder="Company Email"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-              value={employeeData.email}
-              onChange={handleEmployeeChange}
-              disabled={isLoading}
-              required
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-              value={employeeData.password}
-              onChange={handleEmployeeChange}
-              disabled={isLoading}
-              required
-            />
             <button
               type="submit"
               disabled={isLoading}
               className="w-full bg-[#ec3338] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#dc2626] transition-colors duration-200 disabled:bg-[#f8b4b4] disabled:cursor-not-allowed shadow-md hover:shadow-lg">
-              {isLoading ? "LOGGING IN..." : isLogin ? "LOGIN" : "REGISTER"}
+              {isLoading
+                ? isEmployeeLogin
+                  ? "LOGGING IN..."
+                  : "REGISTERING..."
+                : isEmployeeLogin
+                ? "LOGIN"
+                : "REGISTER"}
             </button>
 
-            {!isAdminLogin && (
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="w-full text-center text-sm text-[#ec3338] hover:underline mt-2">
-                {isLogin
-                  ? "No account? Register here"
-                  : "Already have an account? Login here"}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={toggleEmployeeMode}
+              className="w-full text-center text-sm text-[#ec3338] hover:underline mt-2">
+              {isEmployeeLogin
+                ? "No account? Register here"
+                : "Already have an account? Login here"}
+            </button>
           </form>
         )}
       </div>
