@@ -104,7 +104,7 @@ export const Navbar = () => {
         </section>
 
         <section className="flex items-center gap-4">
-          {showAuthUI ? (
+          {showAuthUI && (
             <>
               <span className="text-gray-700">Welcome, {userName}</span>
               <button
@@ -113,7 +113,7 @@ export const Navbar = () => {
                 LOGOUT
               </button>
             </>
-          ) : null}
+          )}
         </section>
       </div>
     </nav>

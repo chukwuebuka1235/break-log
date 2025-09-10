@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [isAdminLogin, setIsAdminLogin] = useState(false);
@@ -45,14 +46,14 @@ export default function LoginPage() {
           );
           router.push("/admin/dashboard");
         } else {
-          alert("Authentication failed");
+          toast.error("Authentication failed");
         }
       } catch (error) {
         console.error("Login error:", error);
-        alert("Login failed. Please try again.");
+        toast.error("Login failed. Please try again.");
       }
     } else {
-      alert("Invalid admin credentials");
+      toast.error("Invalid admin credentials");
     }
     setIsLoading(false);
   };
@@ -80,11 +81,11 @@ export default function LoginPage() {
         localStorage.setItem("user", JSON.stringify(data.user));
         router.push("/");
       } else {
-        alert(data.message || "Login failed");
+        toast.error(data.message || "Login failed");
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     }
     setIsLoading(false);
   };
@@ -96,12 +97,12 @@ export default function LoginPage() {
     try {
       // Employee registration validation
       if (employeeData.password.length < 6) {
-        alert("Password must be at least 6 characters long");
+        toast.error("Password must be at least 6 characters long");
         setIsLoading(false);
         return;
       }
       if (employeeData.password !== confirmPassword) {
-        alert("Passwords do not match");
+        toast.error("Passwords do not match");
         setIsLoading(false);
         return;
       }
@@ -117,7 +118,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Registration successful! Please login.");
+        toast.success("Registration successful! Please login.");
         setIsEmployeeLogin(true);
         setEmployeeData({
           name: "",
@@ -127,11 +128,11 @@ export default function LoginPage() {
         });
         setConfirmPassword("");
       } else {
-        alert(data.message || "Registration failed");
+        toast.error(data.message || "Registration failed");
       }
     } catch (error) {
       console.error("Registration error:", error);
-      alert("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     }
     setIsLoading(false);
   };

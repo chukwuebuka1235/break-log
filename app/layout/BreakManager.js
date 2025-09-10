@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import toast from "react-hot-toast";
+import Toast from "../components/Toast";
 
 export const BreakManager = ({ employeeName, setEmployeeName }) => {
   const [data, setData] = useState([]);
@@ -57,11 +58,11 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
 
   const startBreak = async (name) => {
     if (!name) {
-      alert("Please login first");
+      toast.error("Please login first");
       return;
     }
     if (!description || description.trim() === "") {
-      alert("Please enter a break description");
+      toast.error("Please enter a break description");
       return;
     }
     try {
@@ -95,7 +96,7 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
 
   const endBreak = async (name) => {
     if (!name) {
-      alert("Please login first");
+      toast.error("Please login first");
       return;
     }
     try {
@@ -104,7 +105,7 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
         (item) => item.employeeName === name && item.breakEnd === null
       );
       if (!activeBreak) {
-        alert("No active break found for this user");
+        toast.error("No active break found for this user");
         return;
       }
 

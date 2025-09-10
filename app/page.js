@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BreakManager } from "./layout/BreakManager";
 import { Navbar } from "./layout/navbar";
-
+import { Loader } from "./components/Loader"
 export default function Home() {
   const [employeeName, setEmployeeName] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -11,29 +11,42 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is authenticated
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const user = JSON.parse(userData);
-      setEmployeeName(user.name);
-      setIsAuthenticated(true);
-    } else {
-      // Redirect to login if not authenticated
+    const checkAuth = () => {
+      const userData = localStorage.getItem("user");
+      const employeeCookie = document.cookie.includes(
+        "employee-authenticated=true"
+      );
+
+      if (userData && employeeCookie) {
+        try {
+          const user = JSON.parse(userData);
+          if (user && !user.isAdmin) {
+            setIsAuthenticated(true);
+            setEmployeeName(user.name);
+            return;
+          }
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+        }
+      }
+      setIsAuthenticated(false);
       router.push("/login");
-    }
+    };
+
+    checkAuth();
     setIsLoading(false);
+    const interval = setInterval(checkAuth, 1000);
+    return () => clearInterval(interval);
   }, [router]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
-      </div>
+      <Loader />
     );
   }
 
   if (!isAuthenticated) {
-    return null; // Will redirect to login
+    return null; 
   }
 
   return (
