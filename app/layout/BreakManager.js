@@ -62,6 +62,7 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
       toast.error("Please enter a break description");
       return;
     }
+    const firstname = name.split(" ")[0];
     try {
       setIsLoading(true);
       setShowDescription(false);
@@ -77,15 +78,15 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
       });
       if (response.ok) {
         const result = await response.json();
-        toast.success(`Break started for ${name}`);
+        toast.success(`Break started for ${firstname}`);
         setUserHasActiveBreak(true);
-        setDescription(""); 
+        setDescription("");
         await checkUserBreakStatus(name);
       } else {
-        toast.error(`Failed to start break for ${name}`);
+        toast.error(`Failed to start break for ${firstname}`);
       }
     } catch (error) {
-      toast.error(`Failed to start break for ${name}`);
+      toast.error(`Failed to start break for ${firstname}`);
     } finally {
       setIsLoading(false);
     }
@@ -101,12 +102,13 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
       const activeBreak = data.find(
         (item) => item.employeeName === name && item.breakEnd === null
       );
+      const firstname = name.split(" ")[0];
       if (!activeBreak) {
         toast.error("No active break found for this user");
         return;
       }
 
-      // END BREAK API 
+      // END BREAK API
       const response = await fetch(`/api/breaks/${activeBreak._id}`, {
         method: "PUT",
         headers: {
@@ -115,14 +117,14 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
       });
 
       if (response.ok) {
-        toast.success(`Break ended for ${name}`);
+        toast.success(`Break ended for ${firstname}`);
         setUserHasActiveBreak(false);
         await checkUserBreakStatus(name);
       } else {
-        toast.error(`Failed to end break for ${name}`);
+        toast.error(`Failed to end break for ${firstname}`);
       }
     } catch (error) {
-      toast.error(`Failed to end break for ${name}`);
+      toast.error(`Failed to end break for ${firstname}`);
     } finally {
       setIsLoading(false);
     }
