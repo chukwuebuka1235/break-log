@@ -8,26 +8,34 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+
 export const metadata = {
   title: "Break Management System",
-  description:
-    "Streamline your workforce management with our intuitive break tracking system. Monitor employee breaks in real-time, generate reports, and optimize productivity.",
-  keywords:
-    "break management, employee tracking, productivity, workforce management, break tracker, time management",
+  description: "Streamline your workforce management with our intuitive break tracking system. Monitor employee breaks in real-time, generate reports, and optimize productivity.",
+  keywords: "break management, employee tracking, productivity, workforce management, break tracker, time management",
   authors: [{ name: "Kadick Integrated Limited" }],
   openGraph: {
+    title: "Break Management System",
+    description: "Streamline your workforce management with our intuitive break tracking system.",
+    url: baseUrl,
+    siteName: "Break Management System",
     images: [
       {
-        url: "/kadick.png",
+        url: `${baseUrl}/kadick.png`,
         width: 1200,
         height: 630,
         alt: "Break Management System Preview",
       },
     ],
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/kadick.png"],
+    title: "Break Management System",
+    description: "Streamline your workforce management with our intuitive break tracking system.",
+    images: [`${baseUrl}/kadick.png`], 
   },
 };
 
