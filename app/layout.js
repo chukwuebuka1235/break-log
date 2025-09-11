@@ -15,6 +15,20 @@ export const metadata = {
   keywords:
     "break management, employee tracking, productivity, workforce management, break tracker, time management",
   authors: [{ name: "Kadick Integrated Limited" }],
+  openGraph: {
+    images: [
+      {
+        url: "/kadick.png",
+        width: 1200,
+        height: 630,
+        alt: "Break Management System Preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/kadick.png"],
+  },
 };
 
 export default function RootLayout({ children }) {

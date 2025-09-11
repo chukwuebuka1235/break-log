@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
-import bcrypt from "bcryptjs"; // Add this import
+import bcrypt from "bcryptjs"; 
 
 export async function POST(request) {
   const { name, email, idCard, password } = await request.json();
@@ -24,7 +24,7 @@ export async function POST(request) {
       name,
       email,
       idCard,
-      password: hashedPassword, // Store hashed password
+      password: hashedPassword, 
       createdAt: new Date(),
     });
 

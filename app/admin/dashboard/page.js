@@ -22,8 +22,6 @@ export default function Page() {
       if (response.ok) {
         const data = await response.json();
         setBreaks(data);
-
-        // Calculate statistics
         setTotalBreaks(data.length);
         setOngoingBreaks(
           data.filter((breakItem) => breakItem.breakEnd === null).length

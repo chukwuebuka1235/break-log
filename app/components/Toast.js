@@ -8,7 +8,7 @@ export default function Toast() {
       toastOptions={{
         duration: 4000,
         style: {
-          background: "#1e293b", // slate-800
+          background: "#1e293b", 
           color: "#fff",
           fontWeight: "bold",
         },

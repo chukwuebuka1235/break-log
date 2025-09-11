@@ -1,4 +1,3 @@
-// app/api/auth/logout/route.js
 import { NextResponse } from "next/server";
 
 export async function POST() {
@@ -7,8 +6,6 @@ export async function POST() {
       { message: "Logout successful" },
       { status: 200 }
     );
-
-    // Clear authentication cookies
     response.cookies.set("admin-authenticated", "", {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
@@ -20,14 +17,14 @@ export async function POST() {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 0, // Expire immediately
+      maxAge: 0,
     });
 
     response.cookies.set("employee-id", "", {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 0, // Expire immediately
+      maxAge: 0, 
     });
 
     return response;

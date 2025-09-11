@@ -1,4 +1,3 @@
-// components/Navbar.js
 "use client";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -16,14 +15,12 @@ export const Navbar = () => {
     const dashboardActive = pathname.includes("/admin/dashboard");
     setIsDashboardPage(dashboardActive);
 
-    // Check cookies directly for authentication status
     const checkAuthStatus = () => {
       const adminCookie = document.cookie.includes("admin-authenticated=true");
       const employeeCookie = document.cookie.includes(
         "employee-authenticated=true"
       );
 
-      // Get user data from localStorage if available
       const userData = localStorage.getItem("user");
       let user = null;
 
@@ -35,7 +32,6 @@ export const Navbar = () => {
         }
       }
 
-      // Strict validation: Only show UI if cookie AND user data match page
       if (pathname.includes("/admin") && adminCookie && user && user.isAdmin) {
         setShowAuthUI(true);
         setUserName(user.name);
@@ -53,7 +49,6 @@ export const Navbar = () => {
 
         // Clear inconsistent state
         if ((adminCookie || employeeCookie) && !user) {
-          // Cookies exist but no user data - clear cookies
           document.cookie =
             "admin-authenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
           document.cookie =
@@ -64,8 +59,7 @@ export const Navbar = () => {
 
     checkAuthStatus();
 
-    // Check auth status on route changes
-    const interval = setInterval(checkAuthStatus, 1000); // Check every second
+    const interval = setInterval(checkAuthStatus, 1000); 
     return () => clearInterval(interval);
   }, [pathname]);
 
@@ -75,7 +69,6 @@ export const Navbar = () => {
     } catch (error) {
       console.error("Logout API error:", error);
     } finally {
-      // Always clear both storage and cookies
       localStorage.removeItem("user");
       document.cookie =
         "admin-authenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";

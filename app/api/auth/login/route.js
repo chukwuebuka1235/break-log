@@ -14,8 +14,6 @@ export async function POST(request) {
       client.close();
       return NextResponse.json({ message: "User not found" }, { status: 401 });
     }
-
-    // Use bcrypt to compare the provided password with the hashed password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -27,7 +25,6 @@ export async function POST(request) {
     }
 
     client.close();
-
     // Return user data without password
     const { password: _, ...userWithoutPassword } = user;
 
@@ -36,19 +33,18 @@ export async function POST(request) {
       user: userWithoutPassword,
     });
 
-    // Set employee authentication cookie
     response.cookies.set("employee-authenticated", "true", {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 86400, // 24 hours
+      maxAge: 86400,
     });
 
     response.cookies.set("employee-id", userWithoutPassword._id.toString(), {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 86400, // 24 hours
+      maxAge: 86400, 
     });
 
     return response;

@@ -1,4 +1,3 @@
-// components/BreakManager.js
 "use client";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -20,7 +19,6 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
       const user = JSON.parse(userData);
       setEmployeeName(user.name);
 
-      // Check if this user has an active break
       checkUserBreakStatus(user.name);
     }
   }, [setEmployeeName]);
@@ -43,7 +41,6 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
         const allData = await response.json();
         setData(allData);
 
-        // CHECK FOR ACTIVE BREAK
         const activeBreak = allData.find(
           (item) => item.employeeName === name && item.breakEnd === null
         );
@@ -82,7 +79,7 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
         const result = await response.json();
         toast.success(`Break started for ${name}`);
         setUserHasActiveBreak(true);
-        setDescription(""); // Clear description after starting break
+        setDescription(""); 
         await checkUserBreakStatus(name);
       } else {
         toast.error(`Failed to start break for ${name}`);
@@ -109,7 +106,7 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
         return;
       }
 
-      // Call the API to end the break
+      // END BREAK API 
       const response = await fetch(`/api/breaks/${activeBreak._id}`, {
         method: "PUT",
         headers: {
@@ -160,7 +157,6 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
       .toUpperCase();
     const year = date.getFullYear();
 
-    // Function to add "st", "nd", "rd", "th"
     const getOrdinal = (n) => {
       if (n > 3 && n < 21) return "TH";
       switch (n % 10) {

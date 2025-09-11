@@ -1,5 +1,4 @@
 import { connectToDatabase } from "../../../lib/mongodb";
-import { ObjectId } from "mongodb";
 
 export async function GET(request) {
   try {
@@ -13,7 +12,7 @@ export async function GET(request) {
       // Filter by date (create start and end of day for the given date)
       const startDate = new Date(date);
       const endDate = new Date(date);
-      endDate.setDate(endDate.getDate() + 1); // Next day
+      endDate.setDate(endDate.getDate() + 1); 
 
       query.breakStart = {
         $gte: startDate,
@@ -39,12 +38,11 @@ export async function POST(request) {
     const { db } = await connectToDatabase();
     const { employeeName, description } = await request.json();
 
-    // Create new break document
     const newBreak = {
       employeeName,
       description,
-      breakStart: new Date(), // Current time (adjust timezone if needed)
-      breakEnd: null, // Break hasn't ended yet
+      breakStart: new Date(),
+      breakEnd: null,
     };
 
     const result = await db.collection("breaks").insertOne(newBreak);
@@ -52,7 +50,7 @@ export async function POST(request) {
     return Response.json(
       {
         message: "Break Started",
-        id: result.insertedId, // MongoDB uses insertedId instead of lastID
+        id: result.insertedId,  
         employeeName,
       },
       { status: 201 }

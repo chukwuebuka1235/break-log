@@ -25,7 +25,6 @@ export default function LoginPage() {
     // Admin login validation
     if (adminPassword === "admin123" && adminId === "ADMIN100") {
       try {
-        // Set admin authentication cookie via API
         const response = await fetch("/api/auth/login/admin", {
           method: "POST",
           headers: {
@@ -35,7 +34,6 @@ export default function LoginPage() {
         });
 
         if (response.ok) {
-          // Store admin auth in localStorage
           localStorage.setItem(
             "user",
             JSON.stringify({
@@ -63,7 +61,6 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Employee login
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -95,7 +92,6 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Employee registration validation
       if (employeeData.password.length < 6) {
         toast.error("Password must be at least 6 characters long");
         setIsLoading(false);
@@ -146,7 +142,6 @@ export default function LoginPage() {
 
   const toggleEmployeeMode = () => {
     setIsEmployeeLogin(!isEmployeeLogin);
-    // Reset form when toggling
     setEmployeeData({
       name: "",
       email: "",
