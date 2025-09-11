@@ -186,10 +186,7 @@ export default function Page() {
                                 timeZone: "Africa/Lagos",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                                hour12: true,
-                                // day: "2-digit",
-                                // month: "short",
-                                // year: "numeric",
+                                hour12: true
                               }
                             )}
                           </td>
@@ -201,10 +198,7 @@ export default function Page() {
                                     timeZone: "Africa/Lagos",
                                     hour: "2-digit",
                                     minute: "2-digit",
-                                    hour12: true,
-                                    // day: "2-digit",
-                                    // month: "short",
-                                    // year: "numeric",
+                                    hour12: true
                                   }
                                 )
                               : "Ongoing"}

@@ -10,6 +10,7 @@ export const Navbar = () => {
   const [showAuthUI, setShowAuthUI] = useState(false);
   const [userName, setUserName] = useState("");
   const [isDashboardPage, setIsDashboardPage] = useState(false);
+  const firstName = userName.split(" ")[0];
 
   useEffect(() => {
     const dashboardActive = pathname.includes("/admin/dashboard");
@@ -106,7 +107,7 @@ export const Navbar = () => {
         <section className="flex items-center gap-4">
           {showAuthUI && (
             <>
-              <span className="text-gray-700">Welcome, {userName}</span>
+              <span className="text-gray-700">Welcome, {firstName}</span>
               <button
                 onClick={handleLogout}
                 className="cursor-pointer bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition-colors">

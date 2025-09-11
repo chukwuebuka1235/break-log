@@ -180,160 +180,162 @@ export const BreakManager = ({ employeeName, setEmployeeName }) => {
   const today = new Date();
 
   return (
-    <div className="">
-      <div className="flex flex-col gap-4 ">
-        <h1 className="sm:text-xl ">BREAK TRACKER FOR {formatDate(today)} </h1>
+    <>
+      <div>
+        {/* Controls Section */}
+        <div className="flex flex-col gap-4 w-full max-w-md mx-auto text-center">
+          <h1 className="sm:text-xl">BREAK TRACKER FOR {formatDate(today)}</h1>
+          {!userHasActiveBreak && (
+            <div>
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Break Description (required)"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent"
+                required
+              />
+            </div>
+          )}
 
-        {/* Display the authenticated user's name */}
-        {/* <div className="border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
-          <p className="font-medium">Employee: {employeeName}</p>
-        </div> */}
-
-        {!userHasActiveBreak && (
-          <div>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Break Description (required)"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ec3338] focus:border-transparent"
-              required
-            />
-          </div>
-        )}
-
-        {isLoading ? (
-          <div className="bg-[#f8b4b4] text-white px-4 py-3 rounded-lg text-center">
-            Loading...
-          </div>
-        ) : userHasActiveBreak ? (
-          <button
-            onClick={() => endBreak(employeeName)}
-            className="bg-[#ec3338] text-white px-4 py-3 rounded-lg hover:bg-[#dc2626] transition-colors disabled:bg-[#f8b4b4] disabled:cursor-not-allowed shadow-md hover:shadow-lg"
-            disabled={isLoading}>
-            END BREAK
-          </button>
-        ) : (
-          <button
-            onClick={() => startBreak(employeeName)}
-            className="bg-[#ec3338] text-white px-4 py-3 rounded-lg hover:bg-[#dc2626] transition-colors disabled:bg-[#f8b4b4] disabled:cursor-not-allowed shadow-md hover:shadow-lg"
-            disabled={isLoading || !employeeName || !description.trim()}>
-            START BREAK
-          </button>
-        )}
-      </div>
-
-      <div className="mt-8">
-        <div className="flex items-center justify-center flex-col">
-          <h1 className="sm:text-1xl mb-4">BREAKSHEET</h1>
-          <div className="mb-6">
+          {isLoading ? (
+            <div className="bg-[#f8b4b4] text-white px-4 py-3 rounded-lg text-center">
+              Loading...
+            </div>
+          ) : userHasActiveBreak ? (
             <button
-              onClick={() => {
-                BreakLogs(employeeName);
-                setShowBreaksheet(!showBreaksheet);
-              }}
-              className="bg-[#ec3338] text-white px-4 py-2 rounded-lg hover:bg-[#dc2626] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
-              {showBreaksheet ? (
-                <>
-                  HIDE BREAK SHEET <ChevronUp size={20} />
-                </>
-              ) : (
-                <>
-                  SHOW BREAK SHEET <ChevronDown size={20} />
-                </>
-              )}
+              onClick={() => endBreak(employeeName)}
+              className="bg-[#ec3338] text-white px-4 py-3 rounded-lg hover:bg-[#dc2626] transition-colors disabled:bg-[#f8b4b4] disabled:cursor-not-allowed shadow-md hover:shadow-lg w-full max-w-xs mx-auto"
+              disabled={isLoading}>
+              END BREAK
             </button>
-          </div>
+          ) : (
+            <button
+              onClick={() => startBreak(employeeName)}
+              className="bg-[#ec3338] text-white px-4 py-3 rounded-lg hover:bg-[#dc2626] transition-colors disabled:bg-[#f8b4b4] disabled:cursor-not-allowed shadow-md hover:shadow-lg w-full max-w-xs mx-auto"
+              disabled={isLoading || !employeeName || !description.trim()}>
+              START BREAK
+            </button>
+          )}
         </div>
-        <div>
-          {showBreaksheet && (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                      Employee
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                      Start Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                      End Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                      Duration
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {data
-                    .filter((item) => {
-                      const breakStartDate = adjustToLagosTime(
-                        new Date(item.breakStart)
-                      );
-                      const today = adjustToLagosTime(new Date());
-
-                      // Check if break started today (same day, month, and year)
-                      return (
-                        breakStartDate.getDate() === today.getDate() &&
-                        breakStartDate.getMonth() === today.getMonth() &&
-                        breakStartDate.getFullYear() === today.getFullYear()
-                      );
-                    })
-                    .map((item, index) => (
-                      <tr
-                        key={index}
-                        className={item.breakEnd ? "" : "bg-blue-50"}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {item.employeeName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(item.breakStart).toLocaleString([], {
-                            timeZone: "Africa/Lagos",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.breakEnd
-                            ? new Date(item.breakEnd).toLocaleString([], {
+      </div>
+      <div>
+        {/* Breaksheet Section */}
+        <div className="mt-8 w-full max-w-2xl mx-auto">
+          <div className="flex items-center justify-center flex-col">
+            <h1 className="sm:text-1xl mb-4">BREAKSHEET</h1>
+            <div className="mb-6">
+              <button
+                onClick={() => {
+                  BreakLogs(employeeName);
+                  setShowBreaksheet(!showBreaksheet);
+                }}
+                className="bg-[#ec3338] text-white px-4 py-2 rounded-lg hover:bg-[#dc2626] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg w-full max-w-xs mx-auto">
+                {showBreaksheet ? (
+                  <>
+                    HIDE BREAK SHEET <ChevronUp size={20} />
+                  </>
+                ) : (
+                  <>
+                    SHOW BREAK SHEET <ChevronDown size={20} />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+          <div>
+            {showBreaksheet && (
+              <div className="w-full overflow-x-auto">
+                <table className="min-w-[200px] w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Employee
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Start Time
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        End Time
+                      </th>
+                      <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Description
+                      </th>
+                      <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Duration
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {(() => {
+                      const filteredData = data.filter((item) => {
+                        const breakStartDate = adjustToLagosTime(
+                          new Date(item.breakStart)
+                        );
+                        const today = adjustToLagosTime(new Date());
+                        return (
+                          breakStartDate.getDate() === today.getDate() &&
+                          breakStartDate.getMonth() === today.getMonth() &&
+                          breakStartDate.getFullYear() === today.getFullYear()
+                        );
+                      });
+                      return filteredData.length > 0 ? (
+                        filteredData.map((item, index) => (
+                          <tr
+                            key={index}
+                            className={item.breakEnd ? "" : "bg-blue-50"}>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 break-words truncate max-w-[120px] sm:max-w-none">
+                              {(item.employeeName).split(" ")[0]}
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {new Date(item.breakStart).toLocaleString([], {
                                 timeZone: "Africa/Lagos",
                                 hour: "2-digit",
                                 minute: "2-digit",
                                 hour12: true,
-                              })
-                            : "Ongoing"}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          {item.description}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.breakEnd
-                            ? `${Math.round(
-                                (new Date(item.breakEnd) -
-                                  new Date(item.breakStart)) /
-                                  60000
-                              )} minutes`
-                            : "In progress"}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-
-              {data.length === 0 && (
-                <div className="p-8 text-center text-gray-500">
-                  No break records found.
-                </div>
-              )}
-            </div>
-          )}
+                              })}
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {item.breakEnd
+                                ? new Date(item.breakEnd).toLocaleString([], {
+                                    timeZone: "Africa/Lagos",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })
+                                : "Ongoing"}
+                            </td>
+                            <td className="hidden sm:table-cell px-3 sm:px-6 py-4 text-sm text-gray-500 break-words max-w-[120px] sm:max-w-none">
+                              {item.description}
+                            </td>
+                            <td className="hidden sm:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {item.breakEnd
+                                ? `${Math.round(
+                                    (new Date(item.breakEnd) -
+                                      new Date(item.breakStart)) /
+                                      60000
+                                  )} minutes`
+                                : "In progress"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="p-8 text-center text-gray-500">
+                            No break records found.
+                          </td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
