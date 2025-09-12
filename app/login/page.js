@@ -92,6 +92,11 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      if(!employeeData.email.endsWith("@kadickintegrated.com")){
+        toast.error("Please use your company email to register");
+        setIsLoading(false);
+        return;
+      }
       if (employeeData.password.length < 6) {
         toast.error("Password must be at least 6 characters long");
         setIsLoading(false);

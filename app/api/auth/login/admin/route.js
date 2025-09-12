@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 export async function POST(request) {
   try {
     const { adminId, password } = await request.json();
+    const adminpass = process.env.ADMIN_PASSWORD;
+    const adminid = process.env.ADMIN_ID;
 
     // Validate admin credentials
-    if (adminId === "ADMIN100" && password === "admin123") {
+    if (adminId === adminid && password === adminpass) {
       const response = NextResponse.json(
         { message: "Authentication successful" },
         { status: 200 }
@@ -16,7 +18,6 @@ export async function POST(request) {
         sameSite: "strict",
         maxAge: 86400,
       });
-
       return response;
     } else {
       return NextResponse.json(
