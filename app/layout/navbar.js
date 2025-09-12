@@ -97,7 +97,7 @@ export const Navbar = () => {
           />
         </section>
 
-        <section className="flex items-center gap-4">
+        <section className="flex items-center gap-1 md:gap-4">
           {showAuthUI && (
             <>
               <span className="text-gray-700">Welcome, {firstName}</span>
